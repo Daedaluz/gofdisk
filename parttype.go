@@ -25,7 +25,7 @@ func (p PartType) SetType(typ string) error {
 	str := C.CString(typ)
 	x, err := C.fdisk_parttype_set_typestr(cPartType(p), str)
 	C.free(unsafe.Pointer(str))
-	if x != 0{
+	if x != 0 {
 		return err
 	}
 	return nil
@@ -33,7 +33,7 @@ func (p PartType) SetType(typ string) error {
 
 func (p PartType) SetCode(code int) error {
 	x, err := C.fdisk_parttype_set_code(cPartType(p), C.int(code))
-	if x != 0{
+	if x != 0 {
 		return err
 	}
 	return nil
@@ -62,7 +62,7 @@ func (l Label) GetPartTypeFromCode(code uint64) (PartType, error) {
 	return goPartType(x), nil
 }
 
-func (l Label) GetPartTypeFromString(str string) (PartType,error) {
+func (l Label) GetPartTypeFromString(str string) (PartType, error) {
 	cstr := C.CString(str)
 	x, err := C.fdisk_label_get_parttype_from_string(cLabel(l), cstr)
 	C.free(unsafe.Pointer(cstr))
@@ -94,11 +94,14 @@ func (l Label) ParsePartType(str string) (PartType, error) {
 	return goPartType(x), nil
 }
 
-func (l Label) AdvParsePartType(str string, flags PartTypeParserFlag) PartType {
+func (l Label) AdvParsePartType(str string, flags PartTypeParserFlag) (PartType, error) {
 	cstr := C.CString(str)
-	x := C.fdisk_label_advparse_parttype(cLabel(l), cstr, C.int(flags))
+	x, err := C.fdisk_label_advparse_parttype(cLabel(l), cstr, C.int(flags))
 	C.free(unsafe.Pointer(cstr))
-	return goPartType(x)
+	if x == nil {
+		return goPartType(x), err
+	}
+	return goPartType(x), nil
 }
 
 func (p PartType) GetString() string {
